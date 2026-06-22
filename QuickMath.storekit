@@ -1,0 +1,40 @@
+{
+  "appPolicies" : {
+    "eula" : "",
+    "policies" : [
+      {
+        "locale" : "en_US",
+        "policyText" : "",
+        "policyURL" : ""
+      }
+    ]
+  },
+  "identifier" : "QUICKMATH_STOREKIT_CONFIG",
+  "nonRenewingSubscriptions" : [],
+  "products" : [
+    {
+      "displayPrice" : "0.99",
+      "familyShareable" : true,
+      "internalID" : "quickmath_pro_unlock_id",
+      "localizations" : [
+        {
+          "description" : "Unlock every difficulty tier, your full history charts, weak-spot focus drills and sharing. One-time purchase.",
+          "displayName" : "QuickMath Pro",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "quickmath_pro_unlock",
+      "referenceName" : "QuickMath Pro Unlock",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_failTransactionsEnabled" : false,
+    "_storeKitErrors" : []
+  },
+  "subscriptionGroups" : [],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}
