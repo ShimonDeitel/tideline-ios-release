@@ -23,7 +23,7 @@ jobs:
         run: |
           mkdir -p ~/.appstoreconnect/private_keys
           echo "$ASC_KEY_P8_BASE64" | base64 --decode > ~/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8
-      - name: Import cert + profile
+      - name: Import cert + profile + derive signing
         env:
           DIST_P12_BASE64: ${{ secrets.DIST_P12_BASE64 }}
           DIST_P12_PASSWORD: ${{ secrets.DIST_P12_PASSWORD }}
@@ -40,12 +40,17 @@ jobs:
           security find-identity -v -p codesigning "$KCHAIN"
           PD="$HOME/Library/MobileDevice/Provisioning Profiles"; mkdir -p "$PD"
           echo "$PROFILE_1_B64" | base64 --decode > "$PD/p1.mobileprovision"
+          security cms -D -i "$PD/p1.mobileprovision" > "$RUNNER_TEMP/prof.plist"
+          PROF_NAME=$(/usr/libexec/PlistBuddy -c "Print :Name" "$RUNNER_TEMP/prof.plist")
+          APPID=$(/usr/libexec/PlistBuddy -c "Print :Entitlements:application-identifier" "$RUNNER_TEMP/prof.plist")
+          echo "PROF_NAME=$PROF_NAME" >> "$GITHUB_ENV"
+          echo "BUNDLE=${APPID#*.}" >> "$GITHUB_ENV"
       - name: Archive (strict manual, no auto-provision)
         run: |
           xcodebuild -project QuickMath.xcodeproj -scheme QuickMath -configuration Release \
             -destination 'generic/platform=iOS' -archivePath "$RUNNER_TEMP/QuickMath.xcarchive" \
             CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM=W7Q885Q59C \
-            PROVISIONING_PROFILE_SPECIFIER="Lattice Dist" CODE_SIGN_IDENTITY="Apple Distribution" \
+            PROVISIONING_PROFILE_SPECIFIER="$PROF_NAME" CODE_SIGN_IDENTITY="Apple Distribution" \
             archive
       - name: Export IPA
         run: |
@@ -57,7 +62,7 @@ jobs:
             <key>teamID</key><string>W7Q885Q59C</string>
             <key>signingStyle</key><string>manual</string>
             <key>signingCertificate</key><string>Apple Distribution</string>
-            <key>provisioningProfiles</key><dict><key>com.shimondeitel.lattice</key><string>Lattice Dist</string></dict>
+            <key>provisioningProfiles</key><dict><key>${BUNDLE}</key><string>${PROF_NAME}</string></dict>
             <key>destination</key><string>export</string>
           </dict></plist>
           EOF
